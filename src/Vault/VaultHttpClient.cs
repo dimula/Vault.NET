@@ -102,7 +102,11 @@ namespace Vault
         {
             using (var r = await HttpSendRequest(method, uri, body, vaultToken, wrapTtl, ct).ConfigureAwait(false))
             {
-                if (r.StatusCode != HttpStatusCode.NotFound && !r.IsSuccessStatusCode)
+                if (r.StatusCode == HttpStatusCode.NotFound)
+                {
+                    throw new VaultRequestException($"Requested resource does not exist on the server, status code {r.StatusCode}", r.StatusCode);
+                }
+                if (!r.IsSuccessStatusCode)
                 {
                     throw new VaultRequestException($"Unexpected response, status code {r.StatusCode}", r.StatusCode);
                 }
